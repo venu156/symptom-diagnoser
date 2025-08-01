@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef6f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .main-content {
+            flex: 3;
+            padding: 40px;
+        }
+
+        .sidebar {
+            flex: 1;
+            background-color: #fff;
+            padding: 30px;
+            box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+            border-left: 2px solid #28a745;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .sidebar img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid #28a745;
+            margin-bottom: 20px;
+        }
+
+        .sidebar h3 {
+            margin: 5px 0;
+            color: #28a745;
+        }
+
+        .sidebar p {
+            margin: 2px 0;
+            color: #444;
+            font-size: 14px;
+        }
+
+        .logout {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .logout a {
+            color: #dc3545;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .logout a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            text-align: center;
+            color: #28a745;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #28a745;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar with Doctor Info -->
+    <div class="sidebar">
+        <img src="{{ url_for('static', filename='uploads/' ~ current_user.photo) }}" alt="Doctor Picture">
+        <h3>{{ current_user.name }}</h3>
+        <p><strong>Specialization:</strong> {{ current_user.specialization }}</p>
+    </div>
+
+    <!-- Main Appointments Section -->
+    <div class="main-content">
+        <div class="logout">
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        <h1>Doctor Dashboard</h1>
+        <h2>Your Appointments</h2>
+
+        {% if appointments %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Patient Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Symptoms</th>
+                    <th>Booked On</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.id }}</td>
+                    <td>{{ appointment.user.username }}</td>
+                    <td>{{ appointment.user.email }}</td>
+                    <td>{{ appointment.user.phone }}</td>
+                    <td>{{ appointment.symptoms }}</td>
+                    <td>{{ appointment.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+            <p style="font-size:18px;">No appointments yet.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symptom Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("{{ url_for('static', filename='images/background.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #333;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: auto;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            max-width: 700px;
+            width: 90%;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #007BFF;
+        }
+
+        label {
+            font-size: 18px;
+            color: #555;
+        }
+
+        select {
+            padding: 10px;
+            margin: 10px 0;
+            width: 90%;
+            max-width: 500px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin: 10px 0;
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        li:hover {
+            transform: translateY(-5px);
+        }
+
+        .condition-title {
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .suggestion-button {
+            background-color: #28a745;
+            margin-top: 10px;
+        }
+
+        .suggestion-button:hover {
+            background-color: #218838;
+        }
+
+        .logout {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .flash-message {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        {% with messages = get_flashed_messages(category_filter=["success"]) %}
+            {% if messages %}
+                <div style="padding: 12px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 6px; margin-bottom: 20px;">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+
+        {% if current_user.is_authenticated %}
+            <div class="logout">
+                <p>Welcome, <strong>{{ current_user.username }}</strong> ({{ session.role }}) |
+                <a href="{{ url_for('logout') }}">Logout</a></p>
+            </div>
+        {% endif %}
+
+        <h1>Symptom Checker</h1>
+
+        {% set selected_symptoms = selected_symptoms if selected_symptoms is defined else ["", "", "", ""] %}
+
+        <form action="/diagnosis" method="POST">
+            <label for="symptoms">Select your symptoms:</label><br>
+
+            {% set symptoms_list = [
+                'fever','cold','cough','fatigue','body aches','sore throat','runny nose',
+                'headache','chest pain','shortness of breath','dizziness','nausea',
+                'wheezing','sneezing','itchy eyes','skin rash','joint pain','stiffness','swelling'
+            ] | sort %}
+
+            {% for i in range(4) %}
+                <select name="symptom{{ i + 1 }}" class="symptom-dropdown" required>
+                    <option value="">Select symptom {{ i + 1 }}</option>
+                    <option value="none" {% if selected_symptoms[i] == 'none' %}selected{% endif %}>None</option>
+                    {% for symptom in symptoms_list %}
+                        <option value="{{ symptom }}" {% if selected_symptoms[i] == symptom %}selected{% endif %}>{{ symptom }}</option>
+                    {% endfor %}
+                </select>
+            {% endfor %}
+
+            <br><br>
+            <button type="submit">Check Diagnosis</button>
+        </form>
+
+        {% if diagnosis_results %}
+            <h2>Diagnosis Results:</h2>
+            <ul>
+                {% for result in diagnosis_results %}
+                <li>
+                    <p class="condition-title">{{ result.condition }} ({{ result.match_percentage }}% match)</p>
+                    <p><strong>Stage:</strong> {{ result.stage }}</p>
+                    <p><strong>Description:</strong> {{ result.description }}</p>
+                    <p><strong>Matched Symptoms:</strong> {{ result.matched_symptoms | join(', ') }}</p>
+
+                    {% if session.get('role') == 'user' and doctors %}
+                    <form action="/book_appointment" method="POST">
+                        <input type="hidden" name="condition" value="{{ result.condition }}">
+                        <label>Select Doctor:</label>
+                        <select name="doctor_id" required>
+                            <option value="">--Select--</option>
+                            {% for doc in doctors %}
+                                <option value="{{ doc.id }}">{{ doc.name }} - {{ doc.specialization }}</option>
+                            {% endfor %}
+                        </select><br>
+                        <button type="submit">Book Appointment</button>
+                    </form>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</body>
+</html>

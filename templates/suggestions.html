@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Suggestions</title>
+  <style>
+    /* Global styles */
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url('static\\images\\background.jpg'); /* Replace with your image URL */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .container {
+      background-color: rgba(255, 255, 255, 0.85); /* Slight transparency for readability */
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 1000px;
+      text-align: center;
+      transition: all 0.3s ease-in-out;
+    }
+    .container:hover {
+      transform: scale(1.02);
+    }
+    h2 {
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+
+    /* Doctor card styles */
+    .doctor {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .doctor:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .doctor img {
+      border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+
+    .doctor img:hover {
+      transform: scale(1.1);
+    }
+
+    .doctor-info {
+      flex: 1;
+      margin-left: 20px;
+      text-align: left;
+    }
+
+    .doctor-info p {
+      font-size: 18px;
+      color: #444;
+      margin: 5px 0;
+    }
+
+    /* Button styles */
+    button {
+      padding: 12px 25px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    /* Error message styles */
+    .error-message {
+      color: #ff4d4d;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Doctor Suggestions</h2>
+
+    <div id="doctorList">
+      <!-- Dynamic doctor list will be injected here -->
+    </div>
+
+    <script>
+      // Retrieve the condition from the URL query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const condition = urlParams.get('condition');
+      
+      // Example disease-to-specialist mapping where multiple diseases can be mapped to the same specialist
+      const diseaseToSpecialty = {
+        "Heart Disease": "Cardiologist",
+        "stroke": "Cardiologist",
+        "migraine": "Neurologist",
+        "epilepsy": "Neurologist",
+        "diabetes": "Endocrinologist",
+        "thyroid disorder": "Endocrinologist",
+        "fever": "General Practitioner",
+        "cough": "General Practitioner",
+        "cold": "General Practitioner",
+        "Flu": "General Practitioner",
+        "Common Cold": "General Practitioner",
+        "Anemia": "Hematologist",
+        "Asthma": "Pulmonologist",
+        "Arthritis": "Rheumatologist",
+        "COVID-19": "General Practitioner",
+        "Allergies": "Allergist",
+        "Pneumonia": "Pulmonologist",
+        "Bronchitis": "Pulmonologist",
+        "Strep Throat": "ENT Specialist",
+        "Sinusitis": "ENT Specialist",
+        "Tuberculosis": "Pulmonologist",
+        "Chronic Obstructive Pulmonary Disease (COPD)": "Pulmonologist",
+        "Emphysema": "Pulmonologist",
+        "Pertussis (Whooping Cough)": "Pulmonologist",
+        "Lung Cancer": "Oncologist",
+        "Pulmonary Embolism": "Pulmonologist",
+        "Acute Respiratory Distress Syndrome (ARDS)": "Pulmonologist",
+        "Cystic Fibrosis": "Pulmonologist",
+        "Sleep Apnea": "Pulmonologist",
+        "Pulmonary Hypertension": "Pulmonologist",
+        "Sarcoidosis": "Pulmonologist",
+        "Interstitial Lung Disease": "Pulmonologist",
+        "Chronic Sinusitis": "ENT Specialist",
+        "Heart Failure": "Cardiologist",
+        "Coronary Artery Disease": "Cardiologist",
+        "Arrhythmia": "Cardiologist",
+        "Peripheral Artery Disease (PAD)": "Vascular Surgeon",
+        "Diabetes Mellitus": "Endocrinologist",
+        "Hypothyroidism": "Endocrinologist",
+        "Hyperthyroidism": "Endocrinologist",
+        "Hashimoto’s Thyroiditis": "Endocrinologist",
+        "Addison’s Disease": "Endocrinologist",
+        "Gastroesophageal Reflux Disease (GERD)": "Gastroenterologist",
+        "Irritable Bowel Syndrome (IBS)": "Gastroenterologist",
+        "Crohn’s Disease": "Gastroenterologist",
+        "Ulcerative Colitis": "Gastroenterologist",
+        "Peptic Ulcer Disease": "Gastroenterologist",
+        "Gallstones": "Gastroenterologist",
+        "Acid Reflux": "Gastroenterologist",
+        "Diverticulitis": "Gastroenterologist",
+        "Hepatitis A": "Gastroenterologist",
+        "Hepatitis B": "Gastroenterologist",
+        "Hepatitis C": "Gastroenterologist",
+        "Pancreatitis": "Gastroenterologist",
+        "Kidney Stones": "Urologist",
+        "Chronic Kidney Disease (CKD)": "Nephrologist"
+      };
+
+      const doctors = {
+        "Cardiologist": [
+          { name: "Dr. John Doe", specialty: "Cardiologist", image: "static\\images\\im1.png" },
+          { name: "Dr. Emily White", specialty: "Cardiologist", image: "static\\images\\if1.png" }
+        ],
+        "Neurologist": [
+          { name: "Dr. Jane Smith", specialty: "Neurologist", image: "static\\images\\im2.png" },
+          { name: "Dr. Robert Black", specialty: "Neurologist", image: " static\\ images \\im3.png" }
+        ],
+        "Endocrinologist": [
+          { name: "Dr. Alice Green", specialty: "Endocrinologist", image: "static\\images\if2.png" }
+        ],
+        "General Practitioner": [
+          { name: "Dr. Henry Lee", specialty: "General Practitioner", image: "static\\images\\im3.png" },
+          { name: "Dr. Sarah Wilson", specialty: "General Practitioner", image: "static\\images\\im4.png" }
+        ],
+        "Hematologist": [
+          { name: "Dr. Peter Collins", specialty: "Hematologist", image: "static\\images\\im5.png" }
+        ],
+        "Pulmonologist": [
+          { name: "Dr. Laura White", specialty: "Pulmonologist", image: "static\\images\\if3.png" }
+        ],
+        "Rheumatologist": [
+          { name: "Dr. James Harris", specialty: "Rheumatologist", image: "static\\images\\im6.png" }
+        ],
+        "Allergist": [
+          { name: "Dr. Olivia Moore", specialty: "Allergist", image: "static\\images\\if4.png" }
+        ],
+        "ENT Specialist": [
+          { name: "Dr. Lucas Black", specialty: "ENT Specialist", image: "static\\images\\im7.png" }
+        ],
+        "Oncologist": [
+          { name: "Dr. Amelia Scott", specialty: "Oncologist", image: "static\\images\\if5.png" }
+        ],
+        "Vascular Surgeon": [
+          { name: "Dr. Clara Adams", specialty: "Vascular Surgeon", image: "static\\images\\if6.png" }
+        ],
+        "Gastroenterologist": [
+          { name: "Dr. Benjamin Clark", specialty: "Gastroenterologist", image: "static\\images\\im8.png" }
+        ],
+        "Urologist": [
+          { name: "Dr. Oliver King", specialty: "Urologist", image: "static\\images\\im9.png" }
+        ],
+        "Nephrologist": [
+          { name: "Dr. Charlotte Green", specialty: "Nephrologist", image: "static\\images\\im10.png" }
+        ]
+      };
+
+      // Find the specialty based on the disease
+      const specialty = diseaseToSpecialty[condition];
+
+      // Display doctors of the matching specialty
+      const doctorList = document.getElementById('doctorList');
+      if (specialty && doctors[specialty]) {
+        doctors[specialty].forEach(doctor => {
+          const doctorDiv = document.createElement('div');
+          doctorDiv.classList.add('doctor');
+          doctorDiv.innerHTML = `
+            <img src="${doctor.image}" alt="${doctor.name}" width="100" height="100">
+            <div class="doctor-info">
+              <p><strong>Name:</strong> ${doctor.name}</p>
+              <p><strong>Specialty:</strong> ${doctor.specialty}</p>
+              <button onclick="bookAppointment('${doctor.name}')">Book Appointment</button>
+            </div>
+          `;
+          doctorList.appendChild(doctorDiv);
+        });
+      } else {
+        doctorList.innerHTML = "<p class='error-message'>No doctors found for this condition.</p>";
+      }
+
+      function bookAppointment(doctorName) {
+        // Prompt for patient details
+        const patientName = prompt("Enter your full name:");
+        const patientEmail = prompt("Enter your email address:");
+
+        // Check if patient provided details
+        if (patientName && patientEmail) {
+          alert(`Appointment successfully booked with Dr. ${doctorName}\nPatient Name: ${patientName}\nEmail: ${patientEmail}`);
+        } else {
+          alert("Please provide all details.");
+        }
+      }
+    </script>
+  </div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+body {
+    background-image: url("{{ url_for('static', filename='IMG-20241026-WA0051.jpg') }}");
+    background-size: cover; /* Make the background cover the entire page */
+    background-position: center; /* Center the image */
+    background-attachment: fixed; /* Keep the background fixed when scrolling */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    font-family: Arial, sans-serif;
+    color: #fff; /* Set text color to stand out on the background */
+}
+
+.container {
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay for readability */
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 600px;
+    margin: auto;
+    margin-top: 50px;
+}
+
+
+h1, h2, label {
+    color: #fff; /* Text color */
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
